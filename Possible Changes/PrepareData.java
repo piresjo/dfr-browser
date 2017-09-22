@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import DefaultDict;
+import java.util.Path;
 
 public class PrepareData {
 
@@ -76,7 +77,19 @@ public class PrepareData {
 		if (!(containsFile(directories, "info.json"))) {
 			System.out.println("info.json not found. Use 'prepare-data info-stub' to create one");
 		} else {
-
+			File newCheckFile = new File("/path/to/directory/info.json");
+			BufferedReader br = new BufferedReader(newCheckFile);
+			//JSON STUFF
+			String line = br.readLine();
+			while (line != null) {
+				try {
+					System.out.println(line);
+					line = br.readLine();
+				} catch (Exception e) {
+					System.out.println("Unable to parse info.json");
+				}
+			}
+			
 		}
 		System.out.println("Checking meta.csv.zip...");
 		if (containsFile(directories, "meta.csv.zip")) {
@@ -343,7 +356,40 @@ public class PrepareData {
 	}
 
 	void convertState(String statef, String twout, String dtout, int n) {
+		InputStream fileStream = new FileInputStream(statef);
+		InputStream gzipStream = new GZIPInputStream(fileStream);
+		Reader decoder = new InputStreamReader(gzipStream, encoding);
+		BufferedReader buffered = new BufferedReader(decoder);
+		String line = buffered.readLine();
+		// alpha
+		// beta
+		System.out.println("beta value, not saved in a file: " + beta);
 
+		ArrayList dt = new ArrayList<>();
+
+		DefaultDict tw = new DefaultDict();
+		int lastDoc = 0;
+		DefaultDict currDt = new DefaultDict();
+		int K = 0;
+		while (line != null) {
+			String[] valArray = line.strip().split();
+			String doc = valArray[0];
+			String source = valArray[1];
+			String pos = valArray[2];
+			String typeindex = valArray[3];
+			String word = valArray[4];
+			String topic = valArray[5];
+			int docVal = Integer.parseInt(doc);
+			int typeIndexVal = Integer.parseInt(typeindex);
+			int topicVal = Integer.parseInt(topic);
+			if (topic > K) {
+				K = topic;
+			}
+			if (lastDoc != docVal) {
+				dt.add(currDt);
+				currDt = new DefaultDict();
+			}
+		}
 	}
 
 	void help() {
@@ -355,6 +401,7 @@ public class PrepareData {
 		try {
     		something();
 		} catch (Exception e) {
+			System.out.println("ERROR");
 		}
 		if (success) {
     		// equivalent of Python else goes here
